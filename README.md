@@ -206,53 +206,29 @@ I --> J
 
 ```
 python-job-search-automation/
-
 │
-
 ├── config/
-
 │ ├── filters.example.json
-
 │ ├── config.json
-
 │
-
 ├── src/
-
 │ ├── providers/
-
 │ ├── filters/
-
 │ ├── notifications/
-
 │ ├── storage/
-
 │ ├── scheduler/
-
 │ ├── utils/
-
 │ └── main.py
-
 │
-
 ├── database/
-
 │
-
 ├── tests/
-
 │
-
 ├── docs/
-
 │
-
 ├── README.md
-
 ├── ROADMAP.md
-
 ├── requirements.txt
-
 └── LICENSE
 ```
 
