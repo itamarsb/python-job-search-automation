@@ -1,5 +1,3 @@
-<div align="center">
-
 <p align="center">
     <img src="docs/images/Search_Jobs_Overview_11_02_22.png">
 </p>
