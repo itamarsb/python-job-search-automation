@@ -3,7 +3,6 @@
 </p>
 
 
-
 # 🔎 Python Job Search Automation
 
 <div align="center">
