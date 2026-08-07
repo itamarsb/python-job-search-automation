@@ -50,4 +50,41 @@ creates a configurable job monitoring pipeline.
 
 ```mermaid
 
-[diagrama]
+flowchart TD
+    A["Search Job APIs"]
+
+    B["Receive Job Listings"]
+
+    C{"Already stored?"}
+
+    D["Discard duplicate"]
+
+    E["Apply filtering rules"]
+
+    F{"Matches profile?"}
+
+    G["Discard / Ignore"]
+
+    H["Store opportunity"]
+
+    I["Generate notification"]
+
+    J["Email / Telegram"]
+
+    A --> B
+    B --> C
+
+    C -->|Yes| D
+    C -->|No| E
+
+    E --> F
+
+    F -->|No| G
+    F -->|Yes| H
+
+    H --> I
+    I --> J
+
+```
+
+---
