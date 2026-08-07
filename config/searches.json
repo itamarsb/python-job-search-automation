@@ -1,1 +1,58 @@
-
+{
+  "settings": {
+    "location": "Rio Grande do Sul, Brazil",
+    "language": "pt-br",
+    "country": "br",
+    "pages_per_search": 3,
+    "linkedin_only": false
+  },
+  "searches": [
+    {
+      "name": "Cloud DevOps SRE",
+      "query": "Cloud Engineer OR DevOps OR SRE OR Platform Engineer",
+      "include_patterns": [
+        "\\bcloud\\b",
+        "\\bdevops\\b",
+        "\\bsre\\b",
+        "site reliability",
+        "platform engineer",
+        "observability"
+      ],
+      "exclude_patterns": [
+        "\\bsênior\\b",
+        "\\bsenior\\b",
+        "\\bstaff\\b",
+        "\\bprincipal\\b",
+        "\\blead\\b",
+        "tech lead"
+      ],
+      "blocked_companies": [
+        "Empresa Exemplo",
+        "Consultoria Exemplo"
+      ],
+      "preferred_companies": [
+        "Amazon",
+        "Oracle",
+        "Equatorial",
+        "Dell"
+      ]
+    },
+    {
+      "name": "Desenvolvimento Backend",
+      "query": "Python FastAPI Node.js Backend Developer",
+      "include_patterns": [
+        "\\bpython\\b",
+        "\\bfastapi\\b",
+        "\\bnode\\.?(js)?\\b",
+        "backend",
+        "rest api"
+      ],
+      "exclude_patterns": [
+        "\\bsenior\\b",
+        "\\bstaff\\b",
+        "\\bprincipal\\b"
+      ],
+      "blocked_companies": []
+    }
+  ]
+}
