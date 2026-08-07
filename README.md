@@ -88,3 +88,22 @@ flowchart TD
 ```
 
 ---
+
+
+## 🛡️ Responsible Use & Data Sources
+
+This project is designed to retrieve job information through supported APIs
+and publicly available data providers.
+
+It does not implement direct scraping, authentication bypass, CAPTCHA
+circumvention, or automated interaction with protected areas of employment
+platforms.
+
+The application is intended for personal job opportunity monitoring,
+data organization and software engineering experimentation.
+
+Users are responsible for reviewing and complying with the terms of service,
+rate limits and usage policies of each configured data provider.
+
+---
+
