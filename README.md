@@ -1,105 +1,345 @@
 # 🔎 Python Job Search Automation
 
-> A Python-based platform for monitoring, filtering and organizing job
-> opportunities from multiple providers using APIs, configurable rules
-> and automated notifications.
+<div align="center">
 
-[badges]
+**A Python-based platform for monitoring, filtering and organizing job opportunities from multiple providers using APIs, configurable rules and automated notifications.**
 
----
+<p>
 
-## 📌 Overview
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![JSON](https://img.shields.io/badge/JSON-000000?style=for-the-badge&logo=json&logoColor=white)
+![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-In_Development-orange?style=for-the-badge)
 
-Python Job Search Automation is an open-source project designed to automate
-the discovery and organization of job opportunities without directly scraping
-job platforms.
-
-The application retrieves job listings through supported APIs, processes the
-results using configurable filtering rules, stores relevant opportunities
-locally, eliminates duplicates and sends notifications when matching positions
-are discovered.
-
-The project was created to solve a practical problem: job alerts from traditional
-platforms may arrive late, contain duplicates or include positions that do not
-match the candidate's actual profile.
-
-Instead of repeatedly searching multiple platforms manually, the application
-creates a configurable job monitoring pipeline.
+</p>
 
 ---
 
-## 🎯 Project Goals
+*A practical software engineering project focused on automation, data processing and API integration.*
 
-- Automate job opportunity discovery
-- Query job listings through supported APIs
-- Avoid direct scraping of employment platforms
-- Apply customizable inclusion and exclusion filters
-- Detect and eliminate duplicated opportunities
-- Store historical job data
-- Send automated notifications
-- Allow scheduled and manual execution
-- Provide an extensible architecture for additional providers
+</div>
 
 ---
 
-## 🏗️ Architecture
+# 📖 Overview
+
+Python Job Search Automation is an open-source project designed to automate the discovery, filtering and organization of job opportunities using public APIs and configurable processing rules.
+
+Instead of manually checking multiple job platforms several times a day, the application creates an automated pipeline capable of:
+
+- Searching job opportunities
+- Applying intelligent filters
+- Eliminating duplicates
+- Persisting results
+- Sending notifications
+- Maintaining historical records
+
+The project intentionally avoids direct scraping of employment platforms and is designed around API-based integrations whenever possible.
+
+---
+
+# 🎯 Objectives
+
+The main goals of this project are:
+
+- Automate job opportunity monitoring
+- Reduce manual searching effort
+- Receive notifications earlier
+- Apply highly customizable filtering rules
+- Organize opportunities locally
+- Build a modular and extensible Python application
+- Demonstrate software engineering best practices
+
+---
+
+# 🏗 High-Level Architecture
 
 ```mermaid
+flowchart LR
 
-flowchart TD
-    A["Search Job APIs"]
+A["Job Providers<br/>SerpApi<br/>Future Providers"]
 
-    B["Receive Job Listings"]
+B["Provider Layer"]
 
-    C{"Already stored?"}
+C["Filtering Engine"]
 
-    D["Discard duplicate"]
+D["Duplicate Detection"]
 
-    E["Apply filtering rules"]
+E[("SQLite Database")]
 
-    F{"Matches profile?"}
+F["Notification Engine"]
 
-    G["Discard / Ignore"]
+G["Email"]
 
-    H["Store opportunity"]
+H["Telegram"]
 
-    I["Generate notification"]
+I["Scheduler"]
 
-    J["Email / Telegram"]
+J["CLI"]
 
-    A --> B
-    B --> C
+A --> B
+B --> C
+C --> D
+D --> E
+D --> F
 
-    C -->|Yes| D
-    C -->|No| E
+F --> G
+F --> H
 
-    E --> F
-
-    F -->|No| G
-    F -->|Yes| H
-
-    H --> I
-    I --> J
-
+I --> B
+J --> B
 ```
 
 ---
 
+# 🔄 Processing Pipeline
 
-## 🛡️ Responsible Use & Data Sources
+```mermaid
+flowchart TD
 
-This project is designed to retrieve job information through supported APIs
-and publicly available data providers.
+A["Search APIs"]
 
-It does not implement direct scraping, authentication bypass, CAPTCHA
-circumvention, or automated interaction with protected areas of employment
-platforms.
+B["Receive Results"]
 
-The application is intended for personal job opportunity monitoring,
-data organization and software engineering experimentation.
+C{"Already Stored?"}
 
-Users are responsible for reviewing and complying with the terms of service,
-rate limits and usage policies of each configured data provider.
+D["Discard"]
+
+E["Apply Filters"]
+
+F{"Approved?"}
+
+G["Ignore"]
+
+H["Save"]
+
+I["Notify User"]
+
+J["Email / Telegram"]
+
+A --> B
+
+B --> C
+
+C -->|Yes| D
+
+C -->|No| E
+
+E --> F
+
+F -->|No| G
+
+F -->|Yes| H
+
+H --> I
+
+I --> J
+```
+
+---
+
+# ✨ Planned Features
+
+## 🔍 Job Discovery
+
+- API-based searches
+- Multiple providers
+- Configurable keywords
+- Remote / Hybrid / On-site filtering
+
+---
+
+## 🎯 Advanced Filtering
+
+- Regex support
+- Include keywords
+- Exclude keywords
+- Company allowlist
+- Company denylist
+- Technology filters
+- Seniority filters
+- Geographic filters
+
+---
+
+## 💾 Data Storage
+
+- SQLite database
+- Duplicate detection
+- Search history
+- Opportunity status
+
+---
+
+## 🔔 Notifications
+
+- Email
+- Telegram
+- Future providers
+
+---
+
+## ⚙ Automation
+
+- Manual execution
+- Scheduled execution
+- Configurable frequency
+
+---
+
+# 🧰 Technology Stack
+
+| Technology | Purpose |
+|------------|---------|
+| Python | Core application |
+| SerpApi | Job provider |
+| SQLite | Local database |
+| JSON | Configuration |
+| Regex | Filtering |
+| Requests | HTTP client |
+| Logging | Application logging |
+
+---
+
+# 📁 Planned Project Structure
+
+```
+python-job-search-automation/
+
+│
+
+├── config/
+
+│ ├── filters.example.json
+
+│ ├── config.json
+
+│
+
+├── src/
+
+│ ├── providers/
+
+│ ├── filters/
+
+│ ├── notifications/
+
+│ ├── storage/
+
+│ ├── scheduler/
+
+│ ├── utils/
+
+│ └── main.py
+
+│
+
+├── database/
+
+│
+
+├── tests/
+
+│
+
+├── docs/
+
+│
+
+├── README.md
+
+├── ROADMAP.md
+
+├── requirements.txt
+
+└── LICENSE
+```
+
+---
+
+# 🚀 Current Development Stage
+
+The project is currently under active development.
+
+Initial milestones include:
+
+- Repository structure
+- Configuration system
+- SerpApi integration
+- SQLite persistence
+- Filtering engine
+- Notification system
+
+Future milestones are documented in **ROADMAP.md**.
+
+---
+
+# 🛡 Responsible Use
+
+This project **does not perform direct scraping** of LinkedIn or other employment platforms.
+
+The application is designed to retrieve job opportunities through supported APIs and publicly available providers.
+
+The project does not attempt to:
+
+- bypass authentication
+- circumvent CAPTCHA
+- access private data
+- automate job applications
+- violate platform security mechanisms
+
+Users are responsible for complying with the Terms of Service and usage policies of each configured provider.
+
+---
+
+# 📈 Future Roadmap
+
+Planned future improvements include:
+
+- Multiple providers
+- FastAPI REST API
+- PostgreSQL support
+- Docker deployment
+- GitHub Actions
+- Unit testing
+- Prometheus metrics
+- Grafana dashboards
+- Job ranking engine
+- Web dashboard
+
+For more details, see:
+
+**📄 ROADMAP.md**
+
+---
+
+# 🤝 Contributing
+
+Contributions, ideas and suggestions are welcome.
+
+Feel free to:
+
+- Open an Issue
+- Submit a Pull Request
+- Suggest improvements
+- Report bugs
+
+---
+
+# 📄 License
+
+Distributed under the MIT License.
+
+---
+
+# 👨‍💻 Author
+
+**Itamar de Sá Britto Júnior**
+
+GitHub:
+
+https://github.com/itamarsb
 
 ---
 
