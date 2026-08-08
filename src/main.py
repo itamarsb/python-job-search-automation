@@ -77,6 +77,34 @@ def ask_work_mode() -> bool:
         print("\nValor inválido. Digite apenas '1' ou '2'.")
 
 
+def ask_date_posted() -> str | None:
+    while True:
+        print("\nPeríodo da publicação:")
+        print("  1 = Hoje")
+        print("  2 = Últimos 3 dias")
+        print("  3 = Última semana")
+        print("  4 = Último mês")
+        print("  5 = Qualquer período")
+
+        option = input("Escolha [1/2/3/4/5]: ").strip()
+
+        options = {
+            "1": "today",
+            "2": "3days",
+            "3": "week",
+            "4": "month",
+            "5": None,
+        }
+
+        if option in options:
+            return options[option]
+
+        print(
+            "\nValor inválido. "
+            "Digite apenas 1, 2, 3, 4 ou 5."
+        )
+
+
 def load_config() -> dict[str, Any]:
     if not CONFIG_PATH.exists():
         raise FileNotFoundError(
@@ -129,6 +157,7 @@ def ask_interactive_search() -> dict[str, Any]:
 
     language = ask_language()
     country = ask_country()
+    date_posted = ask_date_posted()
 
     if remote_only:
         if country == "br":
@@ -159,6 +188,7 @@ def ask_interactive_search() -> dict[str, Any]:
         "language": language,
         "country": country,
         "remote_only": remote_only,
+        "date_posted": date_posted,
         "include_patterns": [],
         "exclude_patterns": [],
         "blocked_companies": [],
@@ -277,6 +307,7 @@ def process_search(
     pages: int = 1,
     linkedin_only: bool = False,
     remote_only: bool = False,
+    date_posted: str | None = None,
 ) -> tuple[int, int, int, int]:
     search_name = search_config["name"]
 
@@ -297,6 +328,7 @@ def process_search(
             # não dependemos mais do filtro remoto
             # da SerpApi.
             remote_only=False,
+            date_posted=date_posted,
         )
 
     except SerpApiError:
@@ -379,6 +411,7 @@ def run_interactive() -> None:
         pages=1,
         linkedin_only=False,
         remote_only=search_config["remote_only"],
+        date_posted=search_config["date_posted"],
     )
 
     if search_config["remote_only"]:

@@ -21,6 +21,7 @@ def search_google_jobs(
     country: str = "br",
     pages: int = 1,
     remote_only: bool = False,
+    date_posted: str | None = None,
 ) -> list[dict[str, Any]]:
     api_key = os.getenv("SERPAPI_API_KEY")
 
@@ -40,6 +41,9 @@ def search_google_jobs(
     "hl": language,
     "gl": country,
 }
+
+        if date_posted:
+            params["chips"] = f"date_posted:{date_posted}"
 
         # Só envia location quando realmente existir um valor.
         if location and location.strip():
