@@ -32,39 +32,6 @@ def configure_logging() -> None:
     )
 
 
-def load_config() -> dict[str, Any]:
-    if not CONFIG_PATH.exists():
-        raise FileNotFoundError(
-            f"Arquivo de configuração não encontrado: {CONFIG_PATH}"
-        )
-
-    with CONFIG_PATH.open("r", encoding="utf-8") as file:
-        return json.load(file)
-
-
-def print_new_job(
-    job: dict[str, Any],
-    evaluation: dict[str, Any],
-    search_name: str,
-) -> None:
-    apply_options = job.get("apply_options", [])
-    link = ""
-
-    if apply_options:
-        link = apply_options[0].get("link", "")
-
-    print("\n" + "=" * 80)
-    print(f"NOVA VAGA | Pesquisa: {search_name}")
-    print(f"Título: {job.get('title', 'Não informado')}")
-    print(f"Empresa: {job.get('company_name', 'Não informada')}")
-    print(f"Local: {job.get('location', 'Não informado')}")
-    print(f"Origem: {job.get('via', 'Não informada')}")
-    print(f"LinkedIn: {'Sim' if evaluation['linkedin_source'] else 'Não'}")
-    print(f"Pontuação: {evaluation['score']}")
-    print(f"Link: {link}")
-    print("=" * 80)
-
-
 def ask_language() -> str:
     while True:
         print("\nIdioma da pesquisa:")
@@ -93,6 +60,33 @@ def ask_country() -> str:
         print("\nValor inválido. Digite apenas 'br' ou 'us'.")
 
 
+def ask_work_mode() -> bool:
+    while True:
+        print("\nTipo de trabalho:")
+        print("  1 = Presencial / híbrido")
+        print("  2 = Somente remoto")
+
+        option = input("Escolha [1/2]: ").strip()
+
+        if option == "1":
+            return False
+
+        if option == "2":
+            return True
+
+        print("\nValor inválido. Digite apenas '1' ou '2'.")
+
+
+def load_config() -> dict[str, Any]:
+    if not CONFIG_PATH.exists():
+        raise FileNotFoundError(
+            f"Arquivo de configuração não encontrado: {CONFIG_PATH}"
+        )
+
+    with CONFIG_PATH.open("r", encoding="utf-8") as file:
+        return json.load(file)
+
+
 def ask_interactive_search() -> dict[str, Any]:
     print("\n" + "=" * 70)
     print("PYTHON JOB SEARCH AUTOMATION")
@@ -108,28 +102,52 @@ def ask_interactive_search() -> dict[str, Any]:
 
         print("O cargo não pode ficar vazio.")
 
-    print("\nInforme a localização no formato:")
-    print("city, state, country")
-    print("Exemplo:")
-    print("Orlando, Florida, United States")
-    print("Porto Alegre, Rio Grande do Sul, Brazil")
+    remote_only = ask_work_mode()
 
-    while True:
-        location = input("\nLocalização: ").strip()
+    if remote_only:
+        location = ""
 
-        if location:
-            break
+        print(
+            "\nPesquisa configurada para "
+            "trabalhos exclusivamente remotos."
+        )
 
-        print("A localização não pode ficar vazia.")
+    else:
+        print("\nInforme a localização no formato:")
+        print("city, state, country")
+        print("Exemplo:")
+        print("Orlando, Florida, United States")
+        print("Porto Alegre, Rio Grande do Sul, Brazil")
+
+        while True:
+            location = input("\nLocalização: ").strip()
+
+            if location:
+                break
+
+            print("A localização não pode ficar vazia.")
 
     language = ask_language()
     country = ask_country()
+
+    if remote_only:
+        if country == "br":
+            location = "São Paulo, São Paulo, Brazil"
+
+        elif country == "us":
+            location = "New York, New York, United States"
 
     print("\n" + "-" * 70)
     print("CONFIGURAÇÃO DA PESQUISA")
     print("-" * 70)
     print(f"Cargo:       {query}")
-    print(f"Localização: {location}")
+
+    if remote_only:
+        print("Modalidade:  Somente remoto")
+    else:
+        print("Modalidade:  Presencial / híbrido")
+        print(f"Localização: {location}")
+
     print(f"Idioma:      {language}")
     print(f"País:        {country}")
     print("-" * 70)
@@ -140,14 +158,115 @@ def ask_interactive_search() -> dict[str, Any]:
         "location": location,
         "language": language,
         "country": country,
-
-        # No modo manual, inicialmente não aplicamos
-        # filtros obrigatórios do searches.json.
+        "remote_only": remote_only,
         "include_patterns": [],
         "exclude_patterns": [],
         "blocked_companies": [],
         "preferred_companies": [],
     }
+
+
+def print_new_job(
+    job: dict[str, Any],
+    evaluation: dict[str, Any],
+    search_name: str,
+) -> None:
+    apply_options = job.get("apply_options", [])
+    link = ""
+
+    if apply_options:
+        link = apply_options[0].get("link", "")
+
+    print("\n" + "=" * 80)
+    print(f"NOVA VAGA | Pesquisa: {search_name}")
+    print(f"Título: {job.get('title', 'Não informado')}")
+    print(f"Empresa: {job.get('company_name', 'Não informada')}")
+    print(f"Local: {job.get('location', 'Não informado')}")
+    print(f"Origem: {job.get('via', 'Não informada')}")
+    print(
+        f"LinkedIn: "
+        f"{'Sim' if evaluation['linkedin_source'] else 'Não'}"
+    )
+    print(f"Pontuação: {evaluation['score']}")
+    print(f"Link: {link}")
+    print("=" * 80)
+
+
+def is_remote_job(job: dict[str, Any]) -> bool:
+    """
+    Tenta identificar se uma vaga é realmente remota.
+
+    A verificação usa:
+    - detected_extensions.work_from_home
+    - extensions
+    - localização
+    - título
+    - descrição
+    """
+
+    detected_extensions = job.get(
+        "detected_extensions",
+        {},
+    )
+
+    if detected_extensions.get("work_from_home"):
+        return True
+
+    remote_terms = (
+        "remote",
+        "remoto",
+        "remota",
+        "work from home",
+        "home office",
+        "home-office",
+        "telecommute",
+        "telecommuting",
+        "anywhere",
+        "trabalho remoto",
+    )
+
+    extensions = job.get("extensions", [])
+
+    for extension in extensions:
+        extension_text = str(extension).lower()
+
+        if any(
+            term in extension_text
+            for term in remote_terms
+        ):
+            return True
+
+    location = str(
+        job.get("location", "")
+    ).lower()
+
+    if any(
+        term in location
+        for term in remote_terms
+    ):
+        return True
+
+    title = str(
+        job.get("title", "")
+    ).lower()
+
+    if any(
+        term in title
+        for term in remote_terms
+    ):
+        return True
+
+    description = str(
+        job.get("description", "")
+    ).lower()
+
+    if any(
+        term in description
+        for term in remote_terms
+    ):
+        return True
+
+    return False
 
 
 def process_search(
@@ -157,10 +276,14 @@ def process_search(
     country: str,
     pages: int = 1,
     linkedin_only: bool = False,
-) -> tuple[int, int, int]:
+    remote_only: bool = False,
+) -> tuple[int, int, int, int]:
     search_name = search_config["name"]
 
-    logging.info("Executando pesquisa: %s", search_name)
+    logging.info(
+        "Executando pesquisa: %s",
+        search_name,
+    )
 
     try:
         jobs = search_google_jobs(
@@ -169,20 +292,34 @@ def process_search(
             language=language,
             country=country,
             pages=pages,
+
+            # Importante:
+            # não dependemos mais do filtro remoto
+            # da SerpApi.
+            remote_only=False,
         )
+
     except SerpApiError:
         logging.exception(
             "A pesquisa %s não pôde ser concluída.",
             search_name,
         )
 
-        return 0, 0, 0
+        return 0, 0, 0, 0
 
     total_received = len(jobs)
+    total_remote = 0
     total_approved = 0
     total_new = 0
 
     for job in jobs:
+
+        if remote_only:
+            if not is_remote_job(job):
+                continue
+
+            total_remote += 1
+
         evaluation = evaluate_job(
             job,
             search_config,
@@ -208,14 +345,19 @@ def process_search(
 
         if is_new:
             total_new += 1
+
             print_new_job(
                 job,
                 evaluation,
                 search_name,
             )
 
+    if not remote_only:
+        total_remote = 0
+
     return (
         total_received,
+        total_remote,
         total_approved,
         total_new,
     )
@@ -224,42 +366,101 @@ def process_search(
 def run_interactive() -> None:
     search_config = ask_interactive_search()
 
-    total_received, total_approved, total_new = process_search(
+    (
+        total_received,
+        total_remote,
+        total_approved,
+        total_new,
+    ) = process_search(
         search_config=search_config,
         location=search_config["location"],
         language=search_config["language"],
         country=search_config["country"],
         pages=1,
         linkedin_only=False,
+        remote_only=search_config["remote_only"],
     )
 
-    logging.info(
-        "Finalizado | Recebidas: %d | Aprovadas: %d | Novas: %d",
-        total_received,
-        total_approved,
-        total_new,
-    )
+    if search_config["remote_only"]:
+        logging.info(
+            (
+                "Finalizado | Recebidas: %d | "
+                "Remotas: %d | "
+                "Aprovadas: %d | "
+                "Novas: %d"
+            ),
+            total_received,
+            total_remote,
+            total_approved,
+            total_new,
+        )
+
+    else:
+        logging.info(
+            (
+                "Finalizado | Recebidas: %d | "
+                "Aprovadas: %d | "
+                "Novas: %d"
+            ),
+            total_received,
+            total_approved,
+            total_new,
+        )
 
 
-def run_configured(selected_search: str) -> None:
+def run_configured(
+    selected_search: str,
+) -> None:
     config = load_config()
     settings = config.get("settings", {})
 
-    location = settings.get("location", "")
-    language = settings.get("language", "en")
-    country = settings.get("country", "us")
-    pages = int(settings.get("pages_per_search", 1))
+    location = settings.get(
+        "location",
+        "",
+    )
+
+    language = settings.get(
+        "language",
+        "en",
+    )
+
+    country = settings.get(
+        "country",
+        "us",
+    )
+
+    pages = int(
+        settings.get(
+            "pages_per_search",
+            1,
+        )
+    )
+
     linkedin_only = bool(
-        settings.get("linkedin_only", False)
+        settings.get(
+            "linkedin_only",
+            False,
+        )
+    )
+
+    remote_only = bool(
+        settings.get(
+            "remote_only",
+            False,
+        )
     )
 
     total_received = 0
+    total_remote = 0
     total_approved = 0
     total_new = 0
 
     search_found = False
 
-    for search_config in config.get("searches", []):
+    for search_config in config.get(
+        "searches",
+        [],
+    ):
         search_name = search_config["name"]
 
         if search_name != selected_search:
@@ -267,16 +468,23 @@ def run_configured(selected_search: str) -> None:
 
         search_found = True
 
-        received, approved, new = process_search(
+        (
+            received,
+            remote,
+            approved,
+            new,
+        ) = process_search(
             search_config=search_config,
             location=location,
             language=language,
             country=country,
             pages=pages,
             linkedin_only=linkedin_only,
+            remote_only=remote_only,
         )
 
         total_received += received
+        total_remote += remote
         total_approved += approved
         total_new += new
 
@@ -288,12 +496,31 @@ def run_configured(selected_search: str) -> None:
 
         return
 
-    logging.info(
-        "Finalizado | Recebidas: %d | Aprovadas: %d | Novas: %d",
-        total_received,
-        total_approved,
-        total_new,
-    )
+    if remote_only:
+        logging.info(
+            (
+                "Finalizado | Recebidas: %d | "
+                "Remotas: %d | "
+                "Aprovadas: %d | "
+                "Novas: %d"
+            ),
+            total_received,
+            total_remote,
+            total_approved,
+            total_new,
+        )
+
+    else:
+        logging.info(
+            (
+                "Finalizado | Recebidas: %d | "
+                "Aprovadas: %d | "
+                "Novas: %d"
+            ),
+            total_received,
+            total_approved,
+            total_new,
+        )
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -323,7 +550,10 @@ def main() -> None:
     arguments = parse_arguments()
 
     if arguments.search:
-        run_configured(arguments.search)
+        run_configured(
+            arguments.search
+        )
+
     else:
         run_interactive()
 

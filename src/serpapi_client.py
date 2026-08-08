@@ -20,6 +20,7 @@ def search_google_jobs(
     language: str = "pt",
     country: str = "br",
     pages: int = 1,
+    remote_only: bool = False,
 ) -> list[dict[str, Any]]:
     api_key = os.getenv("SERPAPI_API_KEY")
 
@@ -33,12 +34,12 @@ def search_google_jobs(
 
     for _ in range(max(1, pages)):
         params: dict[str, Any] = {
-            "engine": "google_jobs",
-            "api_key": api_key,
-            "q": query,
-            "hl": language,
-            "gl": country,
-        }
+    "engine": "google_jobs",
+    "api_key": api_key,
+    "q": query,
+    "hl": language,
+    "gl": country,
+}
 
         # Só envia location quando realmente existir um valor.
         if location and location.strip():
