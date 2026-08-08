@@ -1,15 +1,15 @@
 {
   "settings": {
-    "location": "Rio Grande do Sul, Brazil",
-    "language": "pt-br",
-    "country": "br",
-    "pages_per_search": 3,
+    "location": "Orlando, Florida, United States",
+    "language": "en",
+    "country": "us",
+    "pages_per_search": 1,
     "linkedin_only": false
-  },
+},
   "searches": [
     {
       "name": "Cloud DevOps SRE",
-      "query": "Cloud Engineer OR DevOps OR SRE OR Platform Engineer",
+      "query": "Python Developer",
       "include_patterns": [
         "\\bcloud\\b",
         "\\bdevops\\b",
@@ -39,7 +39,7 @@
     },
     {
       "name": "Desenvolvimento Backend",
-      "query": "Python FastAPI Node.js Backend Developer",
+      "query": "Python Developer",
       "include_patterns": [
         "\\bpython\\b",
         "\\bfastapi\\b",

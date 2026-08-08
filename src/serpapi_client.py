@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import time
 from typing import Any
 
 import requests
@@ -15,8 +16,8 @@ class SerpApiError(RuntimeError):
 
 def search_google_jobs(
     query: str,
-    location: str,
-    language: str = "pt-br",
+    location: str = "",
+    language: str = "pt",
     country: str = "br",
     pages: int = 1,
 ) -> list[dict[str, Any]]:
@@ -35,30 +36,60 @@ def search_google_jobs(
             "engine": "google_jobs",
             "api_key": api_key,
             "q": query,
-            "location": location,
             "hl": language,
             "gl": country,
         }
 
+        # Só envia location quando realmente existir um valor.
+        if location and location.strip():
+            params["location"] = location.strip()
+
         if next_page_token:
             params["next_page_token"] = next_page_token
 
-        try:
-            response = requests.get(
-                SERPAPI_ENDPOINT,
-                params=params,
-                timeout=45,
-            )
-            response.raise_for_status()
-        except requests.RequestException as exc:
+        response = None
+
+        # Até 3 tentativas em caso de timeout ou falha temporária.
+        for attempt in range(1, 4):
+            try:
+                response = requests.get(
+                    SERPAPI_ENDPOINT,
+                    params=params,
+                    timeout=60,
+                )
+                response.raise_for_status()
+                break
+
+            except requests.Timeout:
+                if attempt == 3:
+                    raise SerpApiError(
+                        "A consulta à SerpApi excedeu o tempo limite após 3 tentativas."
+                    )
+
+                time.sleep(attempt * 2)
+
+            except requests.RequestException as exc:
+                raise SerpApiError(
+                    f"Falha ao consultar a SerpApi: {exc}"
+                ) from exc
+
+        if response is None:
             raise SerpApiError(
-                f"Falha ao consultar a SerpApi: {exc}"
-            ) from exc
+                "Não foi possível obter resposta da SerpApi."
+            )
 
         payload = response.json()
 
-        if error := payload.get("error"):
-            raise SerpApiError(f"Erro retornado pela SerpApi: {error}")
+        error = payload.get("error")
+
+        # Ausência de resultados não é falha da aplicação.
+        if error:
+            if "hasn't returned any results" in error.lower():
+                return jobs
+
+            raise SerpApiError(
+                f"Erro retornado pela SerpApi: {error}"
+            )
 
         jobs.extend(payload.get("jobs_results", []))
 
